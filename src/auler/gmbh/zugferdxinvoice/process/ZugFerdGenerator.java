@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 
 import org.adempiere.exceptions.AdempiereException;
@@ -47,6 +49,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrg;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MPaymentTerm;
+import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MSysConfig;
@@ -376,6 +379,8 @@ public class ZugFerdGenerator {
 			MUOM unitOfMeasure = MUOM.get(invoiceLine.getC_UOM_ID());
 			String uom = unitOfMeasure.getUNCEFACT();
 
+			MPriceList plist = new MPriceList(Env.getCtx(), invoice.getM_PriceList_ID(), null);
+			
 			if (invoiceLine.isDescription() || (invoiceLine.getM_Product_ID() == 0 && invoiceLine.getC_Charge_ID() == 0)) {
 				Product product = new Product();
 				product.setName("Descriptionline");
@@ -400,16 +405,25 @@ public class ZugFerdGenerator {
 				product.setVATPercent(tax.getRate());
 				product.setUnit(uom);
 				product.setSellerAssignedID(productLine.getValue());
-
 				item.setProduct(product);
 				if (isARC)
 					item.setQuantity(invoiceLine.getQtyInvoiced().negate());
 				else
 					item.setQuantity(invoiceLine.getQtyInvoiced());
-
-				item.setPrice(invoiceLine.getPriceActual());
+				
+				if(plist.isTaxIncluded() && (tax.getRate().compareTo(BigDecimal.ZERO)>0)) {
+					
+					item.setPrice(
+							invoiceLine.getPriceActual()
+							.divide(BigDecimal.ONE
+									.add(tax.getRate()
+											.divide(new BigDecimal("100"))), 2, RoundingMode.HALF_UP)					
+					);
+				}else {
+					item.setPrice(invoiceLine.getPriceActual());
+				}
 				item.setTax(invoiceLine.getTaxAmt());
-				item.setLineTotalAmount(invoiceLine.getLineTotalAmt());
+				//item.setLineTotalAmount(invoiceLine.getLineTotalAmt());
 				if(isCollectiveInvoice(invoice) && (invoiceLine.getM_InOutLine_ID()>0)){
 					item.setDetailedDeliveryPeriod(getMovementDate(invoiceLine), getMovementDate(invoiceLine));
 				}
@@ -429,9 +443,20 @@ public class ZugFerdGenerator {
 					item.setQuantity(invoiceLine.getQtyInvoiced().negate());
 				else
 					item.setQuantity(invoiceLine.getQtyInvoiced());
-				item.setPrice(invoiceLine.getPriceActual());
+				
+				if(plist.isTaxIncluded() && (tax.getRate().compareTo(BigDecimal.ZERO)>0)) {
+					
+					item.setPrice(
+							invoiceLine.getPriceActual()
+							.divide(BigDecimal.ONE
+									.add(tax.getRate()
+											.divide(new BigDecimal("100"))), 2, RoundingMode.HALF_UP)					
+					);
+				}else {
+					item.setPrice(invoiceLine.getPriceActual());
+				}
 				item.setTax(invoiceLine.getTaxAmt());
-				item.setLineTotalAmount(invoiceLine.getLineTotalAmt());
+				//item.setLineTotalAmount(invoiceLine.getLineTotalAmt());
 				if(isCollectiveInvoice(invoice) && (invoiceLine.getM_InOutLine_ID()>0)){
 					item.setDetailedDeliveryPeriod(getMovementDate(invoiceLine), getMovementDate(invoiceLine));
 				}
