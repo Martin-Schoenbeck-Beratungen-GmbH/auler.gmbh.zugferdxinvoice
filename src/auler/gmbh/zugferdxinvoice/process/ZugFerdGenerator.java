@@ -378,7 +378,7 @@ public class ZugFerdGenerator {
 
 			MUOM unitOfMeasure = MUOM.get(invoiceLine.getC_UOM_ID());
 			String uom = unitOfMeasure.getUNCEFACT();
-
+			MTax tax = MTax.get(invoiceLine.getC_Tax_ID());
 			MPriceList plist = new MPriceList(Env.getCtx(), invoice.getM_PriceList_ID(), null);
 			
 			if (invoiceLine.isDescription() || (invoiceLine.getM_Product_ID() == 0 && invoiceLine.getC_Charge_ID() == 0)) {
@@ -401,7 +401,6 @@ public class ZugFerdGenerator {
 				MProduct productLine = MProduct.get(invoiceLine.getM_Product_ID());
 				product.setName(productLine.get_Translation("Name", language, false, true));
 				product.setDescription(safeString(invoiceLine.getDescription()));
-				MTax tax = MTax.get(invoiceLine.getC_Tax_ID());
 				product.setVATPercent(tax.getRate());
 				product.setUnit(uom);
 				product.setSellerAssignedID(productLine.getValue());
@@ -434,7 +433,6 @@ public class ZugFerdGenerator {
 				MCharge charge = MCharge.get(invoiceLine.getC_Charge_ID());
 				product.setName(charge.get_Translation("Name", language, false, true));
 				product.setDescription(safeString(invoiceLine.getDescription()));
-				MTax tax = MTax.get(invoiceLine.getC_Tax_ID());
 				product.setVATPercent(tax.getRate());
 				product.setUnit(CD_UOM);
 
