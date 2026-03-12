@@ -411,12 +411,12 @@ public class ZugFerdGenerator {
 					item.setQuantity(invoiceLine.getQtyInvoiced());
 				
 				if(plist.isTaxIncluded() && (tax.getRate().compareTo(BigDecimal.ZERO)>0)) {
-					
+			
 					item.setPrice(
 							invoiceLine.getPriceActual()
 							.divide(BigDecimal.ONE
 									.add(tax.getRate()
-											.divide(new BigDecimal("100"))), 2, RoundingMode.HALF_UP)					
+											.divide(new BigDecimal("100"))), 12, RoundingMode.HALF_UP)					
 					);
 				}else {
 					item.setPrice(invoiceLine.getPriceActual());
@@ -448,7 +448,7 @@ public class ZugFerdGenerator {
 							invoiceLine.getPriceActual()
 							.divide(BigDecimal.ONE
 									.add(tax.getRate()
-											.divide(new BigDecimal("100"))), 2, RoundingMode.HALF_UP)					
+											.divide(new BigDecimal("100"))), 12, RoundingMode.HALF_UP)					
 					);
 				}else {
 					item.setPrice(invoiceLine.getPriceActual());
